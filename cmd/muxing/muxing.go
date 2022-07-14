@@ -40,9 +40,9 @@ func Start(host string, port int) {
 	})
 	app.Post("/headers", func(c *fiber.Ctx) error {
 		headers := c.GetReqHeaders()
-		a, errA := headers["a"]
-		b, errB := headers["b"]
-		if !errA || !errB {
+		a, foundA := headers["A"]
+		b, foundB := headers["B"]
+		if !foundA || !foundB {
 			return c.SendStatus(http.StatusInternalServerError)
 		}
 		aInt, convErrA := strconv.Atoi(a)
