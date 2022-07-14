@@ -5,6 +5,7 @@ go 1.17
 require github.com/gofiber/fiber/v2 v2.35.0
 
 require (
+	github.com/stretchr/testify v1.7.0
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/klauspost/compress v1.15.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
