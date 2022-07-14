@@ -7,7 +7,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/gorilla/mux"
+	"github.com/gofiber/fiber/v2"
 )
 
 /**
@@ -19,11 +19,37 @@ main function reads host/port from env just for an example, flavor it following 
 
 // Start /** Starts the web server listener on given host and port.
 func Start(host string, port int) {
-	router := mux.NewRouter()
+	app := fiber.New()
+
+	// | METHOD | REQUEST                               | RESPONSE                      |
+	// |--------|---------------------------------------|-------------------------------|
+	// | GET    | `/name/{PARAM}`                       | body: `Hello, PARAM!`         |
+	// | GET    | `/bad`                                | Status: `500`                 |
+	// | POST   | `/data` + Body `PARAM`                | body: `I got message:\nPARAM` |
+	// | POST   | `/headers`+ Headers{"a":"2", "b":"3"} | Header `"a+b": "5"`           |
+	app.Get("/name/{name}", func(c *fiber.Ctx) error {
+		name := c.Params("name")
+		return c.SendString(fmt.Sprintf("Hello, %s", name))
+	})
+	app.Get("/bad", func(c *fiber.Ctx) error {
+		return c.SendStatus(http.StatusInternalServerError)
+	})
+	app.Post("/data", func(c *fiber.Ctx) error {
+		body := c.Body()
+		return c.SendString(fmt.Sprintf("I got message:\n%v", body))
+	})
+	app.Post("/headers", func(c *fiber.Ctx) error {
+		headers := c.GetReqHeaders()
+		for key, value := range headers {
+			c.Set(key, value)
+		}
+		return c.SendStatus(http.StatusOK)
+	})
 
 	log.Println(fmt.Printf("Starting API server on %s:%d\n", host, port))
-	if err := http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), router); err != nil {
-		log.Fatal(err)
+
+	if error := app.Listen(fmt.Sprintf("%s:%d", host, port)); error != nil {
+		log.Fatal(error)
 	}
 }
 
