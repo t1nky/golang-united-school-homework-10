@@ -48,8 +48,8 @@ func Start(host string, port int) {
 
 	log.Println(fmt.Printf("Starting API server on %s:%d\n", host, port))
 
-	if error := app.Listen(fmt.Sprintf("%s:%d", host, port)); error != nil {
-		log.Fatal(error)
+	if err := app.Listen(fmt.Sprintf("%s:%d", host, port)); err != nil {
+		log.Fatal(err)
 	}
 }
 
