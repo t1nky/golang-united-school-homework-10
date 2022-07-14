@@ -27,19 +27,30 @@ func Start(host string, port int) {
 	// | GET    | `/bad`                                | Status: `500`                 |
 	// | POST   | `/data` + Body `PARAM`                | body: `I got message:\nPARAM` |
 	// | POST   | `/headers`+ Headers{"a":"2", "b":"3"} | Header `"a+b": "5"`           |
-	app.Get("/name/{name}", func(c *fiber.Ctx) error {
+	app.Get("/name/:name", func(c *fiber.Ctx) error {
 		name := c.Params("name")
-		return c.SendString(fmt.Sprintf("Hello, %s", name))
+		return c.SendString(fmt.Sprintf("Hello, %s!", name))
 	})
 	app.Get("/bad", func(c *fiber.Ctx) error {
 		return c.SendStatus(http.StatusInternalServerError)
 	})
 	app.Post("/data", func(c *fiber.Ctx) error {
 		body := c.Body()
-		return c.SendString(fmt.Sprintf("I got message:\n%v", body))
+		return c.SendString(fmt.Sprintf("I got message:\n%s", body))
 	})
 	app.Post("/headers", func(c *fiber.Ctx) error {
 		headers := c.GetReqHeaders()
+		a, errA := headers["a"]
+		b, errB := headers["b"]
+		if !errA || !errB {
+			return c.SendStatus(http.StatusInternalServerError)
+		}
+		aInt, convErrA := strconv.Atoi(a)
+		bInt, convErrB := strconv.Atoi(b)
+		if convErrA != nil || convErrB != nil {
+			return c.SendStatus(http.StatusInternalServerError)
+		}
+		c.Set("a+b", strconv.Itoa(aInt+bInt))
 		for key, value := range headers {
 			c.Set(key, value)
 		}
